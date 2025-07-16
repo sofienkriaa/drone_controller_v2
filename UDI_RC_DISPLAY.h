@@ -13,8 +13,24 @@
 #define  WDTDIS1  0X0A             //0b1000 0000 1010  禁止看门狗
 #define  BUFFERSIZE 12
 
-// #define UDI_RC_DISPLAY_DEBUG
+typedef enum ThrottleType
+{
+	throttle_thro = 0,
+	throttle_trim = 1,
+	throttle_DR = 2
+} ThrottleType;
 
+typedef enum CameraType
+{
+	camera_photo = 0,
+	camera_video = 1
+} CameraType;
+
+typedef enum ModeType
+{
+	mode_mode1 = 0,
+	mode_mode2 = 1
+} ModeType;
 
 class  UDI_RC_DISPLAY
 {
@@ -23,14 +39,20 @@ public:
 	void begin(int cs_p, int wr_p, int data_p, int backlight_p);
 	void begin(int cs_p, int wr_p, int data_p);
 	void clear();
-	void setBatteryLevel(int level);
 
 	void display();
 	void noDisplay();
 	char _buffer[BUFFERSIZE];
 	void update();
-  void writePercentage(int percent);
-  void initDisp();
+	void initDisp();
+
+	void writePercentage(int percent);
+	void setThrottleType(ThrottleType type);
+	void setNetworkLevel(unsigned char level);
+	void setBatteryLevel(unsigned char level);
+	void setCameraMode(CameraType camera);
+	void setLight(bool state);
+	void setMode(ModeType mode);
 private:
 	int _cs_p;
 	int _wr_p;

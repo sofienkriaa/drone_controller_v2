@@ -277,3 +277,31 @@ void UDI_RC_DISPLAY::initDisp() {
   writePercentage(0);
   update();
 }
+
+void UDI_RC_DISPLAY::writePercentage(int percent) {
+
+}
+
+void UDI_RC_DISPLAY::setThrottleType(ThrottleType type) {
+
+}
+
+void UDI_RC_DISPLAY::setNetworkLevel(unsigned char level) {
+
+}
+
+void UDI_RC_DISPLAY::setBatteryLevel(unsigned char level) {
+
+}
+
+void UDI_RC_DISPLAY::setCameraMode(CameraType camera) {
+
+}
+
+void UDI_RC_DISPLAY::setLight(bool state) {
+
+}
+
+void UDI_RC_DISPLAY::setMode(ModeType mode) {
+
+}
