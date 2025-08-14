@@ -110,6 +110,8 @@ void UDI_RC_DISPLAY::wrCLR(unsigned char len) {
 }
 
 void UDI_RC_DISPLAY::setBatteryLevel(int level) {
+	// activate frame
+	_buffer[1] |= 0x04;
 	// reset all to zeros
 	_buffer[1] &= 0B10001100;
 
@@ -221,7 +223,7 @@ void UDI_RC_DISPLAY::writeDec(int num, int pos) {
 	byte buf3OnesMask = (bin >> 3) & 0x1F;
 
 	// Apply on Buffer 2 and 3  
-  _buffer[pos + 2] &= buf2ZerosMask;
+	_buffer[pos + 2] &= buf2ZerosMask;
 	_buffer[pos + 2] |= buf2OnesMask;
 
 	_buffer[pos + 3] &= buf3ZerosMask;
@@ -250,43 +252,46 @@ void UDI_RC_DISPLAY::writePercentage(int percent) {
 }
 
 void UDI_RC_DISPLAY::initDisp() {
-  // activate Battery
-  _buffer[0] |= 0x08;
+	// activate light
+	_buffer[0] |= 0x08;
 
-  // activate Battery
-  _buffer[1] |= 0x04;
+	// activate Battery
+	setBatteryLevel(0);
   
-  // activate Throttle
-  _buffer[2] |= 0x04;
+	// activate Throttle
+	_buffer[2] |= 0x04;
   
-  // activate Network
-  _buffer[5] |= 0x8F;
+	// activate Network
+	setNetworkLevel(0);
 
-  // activate parenthesis
-  _buffer[4] |= 0xC0;
-  _buffer[5] |= 0x01;
-  _buffer[1] |= 0x80;
+	// activate parenthesis
+	_buffer[4] |= 0xC0;
+	_buffer[0] |= 0x80;
+	_buffer[1] |= 0x80;
 
-  // animate to 100% and back to 0%
-  for (int i = 0; i < 100; i++) {
-    writePercentage(i);
-    update();
-    delay(10);
-  }
+	// activate points
+	_buffer[5] |= 0x0F;
 
-  writePercentage(100);
-  update();
-  delay(400);
+	// animate to 100% and back to 0%
+	for (int i = 0; i < 100; i++) {
+	writePercentage(i);
+	update();
+	delay(10);
+	}
 
-  for (int i = 100; i >= 0; i--) {
-    writePercentage(i);
-    update();
-    delay(10);
-  }
+	writePercentage(100);
+	update();
+	delay(400);
 
-  // print 00 at the start
-  writePercentage(0);
-  update();
+	for (int i = 100; i >= 0; i--) {
+	writePercentage(i);
+	update();
+	delay(10);
+	}
+
+	// print 00 at the start
+	writePercentage(0);
+	update();
 }
 
 void UDI_RC_DISPLAY::setThrottleType(ThrottleType type) {
@@ -305,7 +310,41 @@ void UDI_RC_DISPLAY::setThrottleType(ThrottleType type) {
 }
 
 void UDI_RC_DISPLAY::setNetworkLevel(unsigned char level) {
-  update();
+
+	// Activate logo
+	_buffer[5] |= 0x80;
+	// reset all to zeros
+	_buffer[0] &= 0xF8;
+	_buffer[4] &= 0xDF;
+	_buffer[5] &= 0xBF;
+
+	switch (level) {
+	case 5:
+		_buffer[0] |= 0x07;
+		_buffer[4] |= 0x20;
+		_buffer[5] |= 0x40;
+		break;
+	case 4:
+		_buffer[0] |= 0x06;
+		_buffer[4] |= 0x20;
+		_buffer[5] |= 0x40;
+		break;
+	case 3:
+		_buffer[0] |= 0x04;
+		_buffer[4] |= 0x20;
+		_buffer[5] |= 0x40;
+		break;
+	case 2:
+		_buffer[4] |= 0x20;
+		_buffer[5] |= 0x40;
+		break;
+	case 1:
+		_buffer[5] |= 0x40;
+		break;
+	case 0:
+	default:
+		break;
+	}
 }
 
 void UDI_RC_DISPLAY::setCameraMode(CameraType camera) {
