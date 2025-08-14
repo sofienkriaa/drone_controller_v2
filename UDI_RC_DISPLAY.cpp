@@ -110,24 +110,29 @@ void UDI_RC_DISPLAY::wrCLR(unsigned char len) {
 }
 
 void UDI_RC_DISPLAY::setBatteryLevel(int level) {
-	// zero out the previous (otherwise the or couldn't be possible)
-	_buffer[0] &= 0x7F;
-	_buffer[1] &= 0x7F;
-	_buffer[2] &= 0x7F;
+	// reset all to zeros
+	_buffer[1] &= 0B10001100;
 
 	switch(level){
-		case 3: // battery on and all 3 segments
-			_buffer[0] |= 0x80;
-		case 2: // battery on and 2 segments
-			_buffer[1] |= 0x80;
-		case 1: // battery on and 1 segment
-			_buffer[2] |= 0x80;
-		case 0: // battery indication off
+		case 5:
+			_buffer[1] |= 0B11111111;
+			break;
+		case 4:
+			_buffer[1] |= 0B11111110;
+			break;
+		case 3:
+			_buffer[1] |= 0B11111100;
+			break;
+		case 2:
+			_buffer[1] |= 0B10111100;
+			break;
+		case 1:
+			_buffer[1] |= 0B10011100;
+			break;
+		case 0:
 		default:
 			break;
 	}
-
-	update();
 }
 
 void UDI_RC_DISPLAY::clear(){
@@ -250,12 +255,17 @@ void UDI_RC_DISPLAY::initDisp() {
 
   // activate Battery
   _buffer[1] |= 0x04;
-
+  
   // activate Throttle
   _buffer[2] |= 0x04;
   
   // activate Network
   _buffer[5] |= 0x8F;
+
+  // activate parenthesis
+  _buffer[4] |= 0xC0;
+  _buffer[5] |= 0x01;
+  _buffer[1] |= 0x80;
 
   // animate to 100% and back to 0%
   for (int i = 0; i < 100; i++) {
@@ -274,34 +284,38 @@ void UDI_RC_DISPLAY::initDisp() {
     delay(10);
   }
 
+  // print 00 at the start
   writePercentage(0);
   update();
 }
 
-void UDI_RC_DISPLAY::writePercentage(int percent) {
-
-}
-
 void UDI_RC_DISPLAY::setThrottleType(ThrottleType type) {
+	// reset all to zeros
+	_buffer[2] &= 0xF8;
 
+	if (type == throttle_thro) {
+		_buffer[2] |= 0xFC;
+	}
+	else if (type == throttle_trim) {
+		_buffer[2] |= 0xFA;
+	}
+	else if (type == throttle_DR) {
+		_buffer[2] |= 0xF9;
+	}
 }
 
 void UDI_RC_DISPLAY::setNetworkLevel(unsigned char level) {
-
-}
-
-void UDI_RC_DISPLAY::setBatteryLevel(unsigned char level) {
-
+  update();
 }
 
 void UDI_RC_DISPLAY::setCameraMode(CameraType camera) {
-
+  update();
 }
 
 void UDI_RC_DISPLAY::setLight(bool state) {
-
+  update();
 }
 
 void UDI_RC_DISPLAY::setMode(ModeType mode) {
-
+  update();
 }

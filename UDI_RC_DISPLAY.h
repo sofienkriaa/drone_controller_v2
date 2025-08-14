@@ -17,7 +17,8 @@ typedef enum ThrottleType
 {
 	throttle_thro = 0,
 	throttle_trim = 1,
-	throttle_DR = 2
+	throttle_DR = 2,
+	throttle_none = 99
 } ThrottleType;
 
 typedef enum CameraType
