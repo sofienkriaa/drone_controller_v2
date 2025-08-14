@@ -117,19 +117,19 @@ void UDI_RC_DISPLAY::setBatteryLevel(int level) {
 
 	switch(level){
 		case 5:
-			_buffer[1] |= 0B11111111;
+			_buffer[1] |= 0x73;
 			break;
 		case 4:
-			_buffer[1] |= 0B11111110;
+			_buffer[1] |= 0x72;
 			break;
 		case 3:
-			_buffer[1] |= 0B11111100;
+			_buffer[1] |= 0x70;
 			break;
 		case 2:
-			_buffer[1] |= 0B10111100;
+			_buffer[1] |= 0x30;
 			break;
 		case 1:
-			_buffer[1] |= 0B10011100;
+			_buffer[1] |= 0x10;
 			break;
 		case 0:
 		default:
@@ -253,16 +253,22 @@ void UDI_RC_DISPLAY::writePercentage(int percent) {
 
 void UDI_RC_DISPLAY::initDisp() {
 	// activate light
-	_buffer[0] |= 0x08;
+	setLight(false);
 
 	// activate Battery
 	setBatteryLevel(0);
   
 	// activate Throttle
-	_buffer[2] |= 0x04;
+	setThrottleType(throttle_none);
   
 	// activate Network
 	setNetworkLevel(0);
+
+	// activate camera
+	setCameraMode(camera_none);
+
+	// activate mode
+	setMode(mode_none);
 
 	// activate parenthesis
 	_buffer[4] |= 0xC0;
@@ -299,13 +305,13 @@ void UDI_RC_DISPLAY::setThrottleType(ThrottleType type) {
 	_buffer[2] &= 0xF8;
 
 	if (type == throttle_thro) {
-		_buffer[2] |= 0xFC;
+		_buffer[2] |= 0x04;
 	}
 	else if (type == throttle_trim) {
-		_buffer[2] |= 0xFA;
+		_buffer[2] |= 0x02;
 	}
 	else if (type == throttle_DR) {
-		_buffer[2] |= 0xF9;
+		_buffer[2] |= 0x01;
 	}
 }
 
@@ -348,13 +354,35 @@ void UDI_RC_DISPLAY::setNetworkLevel(unsigned char level) {
 }
 
 void UDI_RC_DISPLAY::setCameraMode(CameraType camera) {
-  update();
+	// reset all to zeros
+	_buffer[1] &= 0xF7;
+	_buffer[2] &= 0xF7;
+
+	if (camera == camera_photo) {
+		_buffer[1] |= 0x08;
+	}
+	else if (camera == camera_video) {
+		_buffer[2] |= 0x08;
+	}
 }
 
 void UDI_RC_DISPLAY::setLight(bool state) {
-  update();
+	// reset all to zeros
+	_buffer[0] &= 0xF7;
+
+	if (state == true) {
+		_buffer[0] |= 0x08;
+	}
 }
 
 void UDI_RC_DISPLAY::setMode(ModeType mode) {
-  update();
+	// reset all to zeros
+	_buffer[5] &= 0xCF;
+
+	if (mode == mode_mode1) {
+		_buffer[5] |= 0x10;
+	}
+	else if (mode == mode_mode2) {
+		_buffer[5] |= 0x20;
+	}
 }

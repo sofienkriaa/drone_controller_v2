@@ -24,13 +24,15 @@ typedef enum ThrottleType
 typedef enum CameraType
 {
 	camera_photo = 0,
-	camera_video = 1
+	camera_video = 1,
+	camera_none = 99
 } CameraType;
 
 typedef enum ModeType
 {
 	mode_mode1 = 0,
-	mode_mode2 = 1
+	mode_mode2 = 1,
+	mode_none = 99
 } ModeType;
 
 class  UDI_RC_DISPLAY
@@ -50,7 +52,7 @@ public:
 	void writePercentage(int percent);
 	void setThrottleType(ThrottleType type);
 	void setNetworkLevel(unsigned char level);
-	void setBatteryLevel(unsigned char level);
+	void setBatteryLevel(int level);
 	void setCameraMode(CameraType camera);
 	void setLight(bool state);
 	void setMode(ModeType mode);
