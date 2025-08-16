@@ -63,16 +63,6 @@ void UDI_RC_DISPLAY::wrclrdata(unsigned char addr, unsigned char sdata)
 	digitalWrite(_cs_p, HIGH);
 }
 
-void UDI_RC_DISPLAY::display()
-{
-	wrCMD(LCDON);
-}
-
-void UDI_RC_DISPLAY::noDisplay()
-{
-	wrCMD(LCDOFF);
-}
-
 void UDI_RC_DISPLAY::wrone(unsigned char addr, unsigned char sdata)
 {
 	addr <<= 2;
@@ -251,7 +241,7 @@ void UDI_RC_DISPLAY::writePercentage(int percent) {
 	writeDec(unit, 1);
 }
 
-void UDI_RC_DISPLAY::initDisp() {
+void UDI_RC_DISPLAY::init() {
 	// activate light
 	setLight(false);
 

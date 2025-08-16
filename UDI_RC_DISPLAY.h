@@ -41,14 +41,10 @@ public:
 	UDI_RC_DISPLAY();
 	void begin(int cs_p, int wr_p, int data_p, int backlight_p);
 	void begin(int cs_p, int wr_p, int data_p);
-	void clear();
-
-	void display();
-	void noDisplay();
-	char _buffer[BUFFERSIZE];
+	void init();
+	void clear();	
 	void update();
-	void initDisp();
-
+	
 	void writePercentage(int percent);
 	void setThrottleType(ThrottleType type);
 	void setNetworkLevel(unsigned char level);
@@ -62,6 +58,7 @@ private:
 	int _data_p;
 	int _backlight_p;
 	bool _backlight_en;
+	char _buffer[BUFFERSIZE];
 	unsigned char _battery[3];
 	void wrone(unsigned char addr, unsigned char sdata);
 	void wrclrdata(unsigned char addr, unsigned char sdata);
