@@ -63,6 +63,13 @@ int last_angleValue      = 0;
 int last_tailValue       = 0;
 int last_ailronValue     = 0;
 
+/*
+ * transmit variable
+ */
+bool isTransmit = false;
+uint8_t transmitVal_1 = 0;
+uint8_t transmitVal_2 = 0;
+
 /* 
  * Singleton instance of the radio 
  */
@@ -72,8 +79,6 @@ RF22 rf22;
  * create an "lcd" object 
  */
 UDI_RC_DISPLAY lcd;
-
-
 
 /* 
  * "keypad" params
@@ -131,7 +136,7 @@ void setup(){
 
 void loop() {
   // read and save Pots values
-  readPots();
+  isTransmit = readPots();
 
   // read buttons
   customKeypad.tick();
@@ -142,17 +147,25 @@ void loop() {
     Serial.print(pressedKey);
     if(e.bit.EVENT == KEY_JUST_PRESSED) {
       Serial.println(" pressed");
-      executeCommand(pressedKey);
+      registerCommand(pressedKey);
+      isTransmit = true;
     }
     // TODO: else if(e.bit.EVENT == KEY_JUST_RELEASED) Serial.println(" released");
   }
 
+  if (isTransmit == true){
+    // TODO: rf22.send(data, sizeof(data));
+  }
+  
   delay(10);
 
   // TODO: testDisplay();
 }
 
-void readPots() {
+bool readPots() {
+  // is transmit needed
+  bool isTransmNeeded = false;
+  
   throttleValue   = analogRead(throttlePin);
   angleValue      = analogRead(anglePin);
   tailValue       = analogRead(tailPin);
@@ -174,7 +187,11 @@ void readPots() {
     last_angleValue = angleValue;
     last_tailValue = tailValue;
     last_ailronValue = ailronValue;
+
+    isTransmNeeded = false;
   }
+
+  return isTransmNeeded;
 }
 
 void testDisplay() {
@@ -247,31 +264,43 @@ void testDisplay() {
   }
 }
 
-void executeCommand(char pressedKey) {
+void registerCommand(char pressedKey) {
   switch(pressedKey){
     case 'L':
+      transmitVal_1 |= 0x01;
       break;
     case '3':
+      transmitVal_1 |= 0x02;
       break;
     case '6':
+      transmitVal_1 |= 0x04;
       break;
     case 'R':
+      transmitVal_1 |= 0x08;
       break;
     case '2':
+      transmitVal_1 |= 0x10;
       break;
     case '5':
+      transmitVal_1 |= 0x20;
       break;
     case '7':
+      transmitVal_1 |= 0x40;
       break;
     case '9':
+      transmitVal_1 |= 0x80;
       break;
     case '1':
+      transmitVal_2 |= 0x01;
       break;
     case '8':
+      transmitVal_2 |= 0x02;
       break;
     case '0':
+      transmitVal_2 |= 0x04;
       break;
     case '4':
+      transmitVal_2 |= 0x08;
       break;
     default:
       break;
@@ -322,6 +351,6 @@ Handshake_ret rf22Handshake() {
 }
 
 void stopForever() {
-  while (1) {    
+  while (1) {
   }
 }
