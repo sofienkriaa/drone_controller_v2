@@ -135,23 +135,9 @@ void setup(){
 }
 
 void loop() {
-  // read and save Pots values
-  isTransmit = readPots();
-
-  // read buttons
-  customKeypad.tick();
-
-  while(customKeypad.available()){
-    keypadEvent e = customKeypad.read();
-    char pressedKey = (char)e.bit.KEY;
-    Serial.print(pressedKey);
-    if(e.bit.EVENT == KEY_JUST_PRESSED) {
-      Serial.println(" pressed");
-      registerCommand(pressedKey);
-      isTransmit = true;
-    }
-    // TODO: else if(e.bit.EVENT == KEY_JUST_RELEASED) Serial.println(" released");
-  }
+  // read Pots and Buttons values
+  readPots();
+  readButtons();
 
   if (isTransmit == true){
     // TODO: rf22.send(data, sizeof(data));
@@ -163,8 +149,7 @@ void loop() {
 }
 
 bool readPots() {
-  // is transmit needed
-  bool isTransmNeeded = false;
+  // read Potentiometers
   
   throttleValue   = analogRead(throttlePin);
   angleValue      = analogRead(anglePin);
@@ -188,10 +173,27 @@ bool readPots() {
     last_tailValue = tailValue;
     last_ailronValue = ailronValue;
 
-    isTransmNeeded = false;
+    isTransmit = true;
   }
+}
 
-  return isTransmNeeded;
+void readButtons() {
+  // read buttons
+  customKeypad.tick();
+
+  while(customKeypad.available()){
+    keypadEvent e = customKeypad.read();
+    char pressedKey = (char)e.bit.KEY;
+    Serial.print(pressedKey);
+    if(e.bit.EVENT == KEY_JUST_PRESSED) {
+      
+      Serial.println(" pressed");
+      registerCommand(pressedKey);
+      
+      isTransmit = true;
+    }
+    // TODO: else if(e.bit.EVENT == KEY_JUST_RELEASED) Serial.println(" released");
+  }
 }
 
 void testDisplay() {
@@ -265,6 +267,7 @@ void testDisplay() {
 }
 
 void registerCommand(char pressedKey) {
+  // activate the correspondent bits in the transmitted bytes 
   switch(pressedKey){
     case 'L':
       transmitVal_1 |= 0x01;
