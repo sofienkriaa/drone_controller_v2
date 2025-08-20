@@ -142,67 +142,141 @@ void UDI_RC_DISPLAY::update(){
 	wrone(10,_buffer[0]);
 }
 
-char UDI_RC_DISPLAY::decTo7Seg(int dec) {
-	if (dec < 0) {
-		dec = 0;
+char UDI_RC_DISPLAY::binTo7Seg(char dec, PrintType pType) {
+
+	if (pType == print_int) {
+		if (dec < 0) {
+			dec = 0;
+		}
+		else if (dec > 9) {
+			dec = 9;
+		}
+		switch (dec) {
+			case 0:
+				return 0x7D;
+				break;
+			case 1:
+				return 0x30;
+				break;
+			case 2:
+				return 0x6B;
+				break;
+			case 3:
+				return 0x7A;
+				break;
+			case 4:
+				return 0x36;
+				break;
+			case 5:
+				return 0x5E;
+				break;
+			case 6:
+				return 0x5F;
+				break;
+			case 7:
+				return 0x70;
+				break;
+			case 8:
+				return 0x7F;
+				break;
+			case 9:
+				return 0x7E;
+				break;
+			default:
+				break;
+		}
 	}
-	else if (dec > 9) {
-		dec = 9;
-	}
-	switch (dec) {
-	case 0:
-		return 0x7D;
-	case 1:
-		return 0x30;
-	case 2:
-		return 0x6B;
-	case 3:
-		return 0x7A;
-	case 4:
-		return 0x36;
-	case 5:
-		return 0x5E;
-	case 6:
-		return 0x5F;
-	case 7:
-		return 0x70;
-	case 8:
-		return 0x7F;
-	case 9:
-		return 0x7E;
+	else if (pType == print_char) {
+		switch (dec) {
+			case 'A':
+				return 0x77;
+				break;
+			case 'B':
+				return 0x1F;
+				break;
+			case 'C':
+				return 0x4D;
+				break;
+			case 'D':
+				return 0x2B;
+				break;
+			case 'E':
+				return 0x4F;
+				break;
+			case 'F':
+				return 0x47;
+				break;
+			case 'G':
+				return 0x7E;
+				break;
+			case 'H':
+				return 0x37;
+				break;
+			case 'I':
+				return 0x30;
+				break;
+			case 'J':
+				return 0x38;
+				break;
+			case 'K':
+				return 0x57;
+				break;
+			case 'L':
+				return 0x0D;
+				break;
+			case 'M':
+				return 0x75;
+				break;
+			case 'N':
+				return 0x13;
+				break;
+			case 'O':
+				return 0x33;
+				break;
+			case 'P':
+				return 0x67;
+				break;
+			case 'Q':
+				return 0x6F;
+				break;
+			case 'R':
+				return 0x03;
+				break;
+			case 'S':
+				return 0x5E;
+				break;
+			case 'T':
+				return 0x0F;
+				break;
+			case 'U':
+				return 0x19;
+				break;
+			case 'V':
+				return 0x3D;
+				break;
+			case 'W':
+				return 0x3D;
+				break;
+			case 'X':
+				return 0x37;
+				break;
+			case 'Y':
+				return 0x3E;
+				break;
+			case 'Z':
+				return 0x6B;
+				break;
+			default:
+				break;
+		}
 	}
 }
 
-char UDI_RC_DISPLAY::charTo7Seg(int dec) {
-	switch (dec) {
-	case 'A':
-		return 0x00;
-	case 'a':
-		return 0x00;
-	case 'B':
-		return 0x00;
-	case 'b':
-		return 0x00;
-	case 'C':
-		return 0x00;
-	case 'c':
-		return 0x00;
-	case 'D':
-		return 0x00;
-	case 'd':
-		return 0x00;
-	case 'E':
-		return 0x00;
-	case 'e':
-		return 0x00;
-	}
-}
-
-void UDI_RC_DISPLAY::writeDec(int num, int pos) {
+void UDI_RC_DISPLAY::writeDec(char num, int pos, PrintType pType) {
 	// pos 0 --> units
 	// pos 1 --> decimals
 
-	byte bin = decTo7Seg(num);
+	byte bin = binTo7Seg(num, pType);
 
 	// create masks
 	// 3 first bits in Buffer 2, the rest for Buffer 3
@@ -237,8 +311,8 @@ void UDI_RC_DISPLAY::writePercentage(int percent) {
 	unit = percent % 10;
 
 	writeCent(cent);
-	writeDec(dec, 0);
-	writeDec(unit, 1);
+	writeDec(dec, 0, print_int);
+	writeDec(unit, 1, print_int);
 }
 
 void UDI_RC_DISPLAY::init() {

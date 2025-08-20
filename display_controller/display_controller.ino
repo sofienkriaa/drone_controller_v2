@@ -138,7 +138,10 @@ void loop() {
   // read Pots and Buttons values
   readPots();
   readButtons();
-
+  
+  lcd.writeDec('E', 0, print_char);
+  lcd.writeDec('R', 1, print_char);
+  
   if (isTransmit == true){
     // TODO: rf22.send(data, sizeof(data));
   }

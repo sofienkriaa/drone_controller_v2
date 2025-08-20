@@ -35,6 +35,15 @@ typedef enum ModeType
 	mode_none = 99
 } ModeType;
 
+/*
+* choose to print Integer or Char
+*/
+typedef enum PrintType
+{
+	print_int = 0,
+	print_char = 1
+} PrintType;
+
 class  UDI_RC_DISPLAY
 {
 public:
@@ -52,6 +61,8 @@ public:
 	void setCameraMode(CameraType camera);
 	void setLight(bool state);
 	void setMode(ModeType mode);
+
+	void writeDec(char num, int pos, PrintType pType);
 private:
 	int _cs_p;
 	int _wr_p;
@@ -66,9 +77,7 @@ private:
 	void wrDATA(unsigned char data, unsigned char cnt);
 	void wrCMD(unsigned char CMD);
 	void config(); // legacy: why not in begin func
-	char decTo7Seg(int dec);
-	char charTo7Seg(int dec);
-	void writeDec(int num, int pos);
+	char binTo7Seg(char dec, PrintType pType);
 	void writeCent(int cent);
 
 };
