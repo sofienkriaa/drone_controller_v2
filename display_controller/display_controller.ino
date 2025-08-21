@@ -105,6 +105,9 @@ void setup(){
   lcd.begin(13, 12, 8);
   lcd.init();
 
+  lcd.printError(receiverNotFound_err);
+
+  
   // init RF22
   if (!rf22.init()) {
     // Defaults after init are 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36  
@@ -119,12 +122,15 @@ void setup(){
     // RF22 successfully initialized
     Serial.println("RF22 init succeeded");
 
+    lcd.printError(receiverNotFound_err);
+    
     // Handshake with the RF22
     Handshake_ret handshakeState = rf22Handshake();
 
     if (handshakeState != handshake_success) {
+      
       // could not have a successful handshake
-      stopForever();
+      //stopForever();
     }
   }
 
@@ -138,9 +144,6 @@ void loop() {
   // read Pots and Buttons values
   readPots();
   readButtons();
-  
-  lcd.writeDec('E', 0, print_char);
-  lcd.writeDec('R', 1, print_char);
   
   if (isTransmit == true){
     // TODO: rf22.send(data, sizeof(data));

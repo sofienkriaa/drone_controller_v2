@@ -344,9 +344,9 @@ void UDI_RC_DISPLAY::init() {
 
 	// animate to 100% and back to 0%
 	for (int i = 0; i < 100; i++) {
-	writePercentage(i);
-	update();
-	delay(10);
+		writePercentage(i);
+		update();
+		delay(10);
 	}
 
 	writePercentage(100);
@@ -354,9 +354,9 @@ void UDI_RC_DISPLAY::init() {
 	delay(400);
 
 	for (int i = 100; i >= 0; i--) {
-	writePercentage(i);
-	update();
-	delay(10);
+		writePercentage(i);
+		update();
+		delay(10);
 	}
 
 	// print 00 at the start
@@ -448,5 +448,23 @@ void UDI_RC_DISPLAY::setMode(ModeType mode) {
 	}
 	else if (mode == mode_mode2) {
 		_buffer[5] |= 0x20;
+	}
+}
+
+void UDI_RC_DISPLAY::printError(ErrorType errorCode) {
+
+	while (true) {
+		// print Er for 1 sec
+		writeDec('E', 0, print_char);
+		writeDec('R', 1, print_char);
+		update();
+
+		delay(1000);
+
+		// print Error code for 1 sec
+		writePercentage(1);
+		update();
+
+		delay(1000);
 	}
 }

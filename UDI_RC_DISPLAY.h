@@ -44,6 +44,15 @@ typedef enum PrintType
 	print_char = 1
 } PrintType;
 
+/*
+* Error type
+*/
+typedef enum ErrorType
+{
+	rfNotFound_err			= 0,
+	receiverNotFound_err	= 1
+} ErrorType;
+
 class  UDI_RC_DISPLAY
 {
 public:
@@ -62,6 +71,7 @@ public:
 	void setLight(bool state);
 	void setMode(ModeType mode);
 
+	void printError(ErrorType errorCode);
 	void writeDec(char num, int pos, PrintType pType);
 private:
 	int _cs_p;
