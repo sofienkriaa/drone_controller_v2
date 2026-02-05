@@ -74,6 +74,7 @@ uint8_t transmitVal_2 = 0;
  * Singleton instance of the radio 
  */
 RF22 rf22;
+uint8_t dataToSend[] = {0, 0, 0, 0 ,0, 0};
 
 /* 
  * create an "lcd" object 
@@ -131,7 +132,7 @@ void setup(){
       lcd.writeDec('D', 1, print_char);
       lcd.writeDec('O', 0, print_char);
       lcd.update();
-      stopForever();
+      //stopForever();
     }
   }
 
@@ -147,10 +148,24 @@ void loop() {
   readButtons();
   
   if (isTransmit == true){
-    // TODO: rf22.send(data, sizeof(data));
+    Serial.print(dataToSend[0]);
+    Serial.print(" : ");
+    Serial.print(dataToSend[1]);
+    Serial.print(" : ");
+    Serial.print(dataToSend[2]);
+    Serial.print(" : ");
+    Serial.print(dataToSend[3]);
+    Serial.print(" : ");
+    Serial.print(dataToSend[4]);
+    Serial.print(" : ");
+    Serial.println(dataToSend[5]);
+    
+    rf22.send(dataToSend, sizeof(dataToSend));
+
+    isTransmit = false;
   }
   
-  delay(10);
+  //delay(10);
 
   // TODO: testDisplay();
 }
@@ -167,19 +182,24 @@ bool readPots() {
     || ((angleValue > last_angleValue + pot_sensibility)      || (angleValue < last_angleValue - pot_sensibility))
     || ((tailValue > last_tailValue + pot_sensibility)        || (tailValue < last_tailValue - pot_sensibility))
     || ((ailronValue > last_ailronValue + pot_sensibility)    || (ailronValue < last_ailronValue - pot_sensibility))) {
-    Serial.print(throttleValue);
+    /*Serial.print(throttleValue);
     Serial.print(" : ");
     Serial.print(angleValue);
     Serial.print(" : ");
     Serial.print(tailValue);
     Serial.print(" : ");
-    Serial.println(ailronValue);
+    Serial.println(ailronValue);*/
 
     last_throttleValue = throttleValue;
     last_angleValue = angleValue;
     last_tailValue = tailValue;
     last_ailronValue = ailronValue;
 
+    dataToSend[0] = map(throttleValue, 0, 1024, 0, 256);
+    dataToSend[1] = map(angleValue, 0, 1024, 0, 256);
+    dataToSend[2] = map(tailValue, 0, 1024, 0, 256);
+    dataToSend[3] = map(ailronValue, 0, 1024, 0, 256);
+    
     isTransmit = true;
   }
 }
@@ -194,12 +214,22 @@ void readButtons() {
     Serial.print(pressedKey);
     if(e.bit.EVENT == KEY_JUST_PRESSED) {
       
-      Serial.println(" pressed");
+      // Serial.println(" pressed");
       registerCommand(pressedKey);
       
       isTransmit = true;
+      dataToSend[4] = transmitVal_1;
+      dataToSend[5] = transmitVal_2;
     }
-    // TODO: else if(e.bit.EVENT == KEY_JUST_RELEASED) Serial.println(" released");
+    else if(e.bit.EVENT == KEY_JUST_RELEASED) {
+      
+      // Serial.println(" released");
+      deregisterCommand(pressedKey);
+
+      isTransmit = true;
+      dataToSend[4] = transmitVal_1;
+      dataToSend[5] = transmitVal_2;
+    }
   }
 }
 
@@ -311,6 +341,50 @@ void registerCommand(char pressedKey) {
       break;
     case '4':
       transmitVal_2 |= 0x08;
+      break;
+    default:
+      break;
+  }
+}
+
+void deregisterCommand(char pressedKey) {
+  // activate the correspondent bits in the transmitted bytes 
+  switch(pressedKey){
+    case 'L':
+      transmitVal_1 &= 0xFE;
+      break;
+    case '3':
+      transmitVal_1 &= 0xFD;
+      break;
+    case '6':
+      transmitVal_1 &= 0xFB;
+      break;
+    case 'R':
+      transmitVal_1 &= 0xF7;
+      break;
+    case '2':
+      transmitVal_1 &= 0xEF;
+      break;
+    case '5':
+      transmitVal_1 &= 0xDF;
+      break;
+    case '7':
+      transmitVal_1 &= 0xBF;
+      break;
+    case '9':
+      transmitVal_1 &= 0x7F;
+      break;
+    case '1':
+      transmitVal_2 &= 0xFE;
+      break;
+    case '8':
+      transmitVal_2 &= 0xFD;
+      break;
+    case '0':
+      transmitVal_2 &= 0xFB;
+      break;
+    case '4':
+      transmitVal_2 &= 0xF7;
       break;
     default:
       break;
