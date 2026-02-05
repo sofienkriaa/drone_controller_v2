@@ -104,25 +104,19 @@ void setup(){
   // init LCD Display
   lcd.begin(13, 12, 8);
   lcd.init();
-
-  lcd.printError(receiverNotFound_err);
-
   
   // init RF22
   if (!rf22.init()) {
     // Defaults after init are 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36  
     Serial.println("RF22 init failed");
 
-    // TODO: Add Error Message in LCD
-    
-    // could not continue without RF transmitter
-    stopForever();
+    // Error Message in LCD
+    lcd.printError(rfNotFound_err);
   }
   else {
     // RF22 successfully initialized
     Serial.println("RF22 init succeeded");
 
-    lcd.printError(receiverNotFound_err);
     
     // Handshake with the RF22
     Handshake_ret handshakeState = rf22Handshake();
@@ -130,7 +124,14 @@ void setup(){
     if (handshakeState != handshake_success) {
       
       // could not have a successful handshake
-      //stopForever();
+      Serial.print("here!");
+      lcd.printError(receiverNotFound_err);
+    } 
+    else {
+      lcd.writeDec('D', 1, print_char);
+      lcd.writeDec('O', 0, print_char);
+      lcd.update();
+      stopForever();
     }
   }
 
