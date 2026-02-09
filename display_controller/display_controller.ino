@@ -39,6 +39,12 @@
 #define HAND_SHAKE_RECEIVES "Hello Back!"
 
 /*
+ * Ping Chars
+ */
+#define HAND_SHAKE_PING 'S'
+#define HAND_SHAKE_PONG 'K'
+
+/*
  * handshake return type
  */
 typedef enum Handshake_ret
@@ -125,14 +131,15 @@ void setup(){
     if (handshakeState != handshake_success) {
       
       // could not have a successful handshake
-      Serial.print("here!");
+      Serial.print("Not Success!");
       lcd.printError(receiverNotFound_err);
+      stopForever();
     } 
     else {
+      Serial.print("Success!");
       lcd.writeDec('D', 1, print_char);
       lcd.writeDec('O', 0, print_char);
       lcd.update();
-      //stopForever();
     }
   }
 
@@ -148,24 +155,19 @@ void loop() {
   readButtons();
   
   if (isTransmit == true){
-    Serial.print(dataToSend[0]);
-    Serial.print(" : ");
-    Serial.print(dataToSend[1]);
-    Serial.print(" : ");
-    Serial.print(dataToSend[2]);
-    Serial.print(" : ");
-    Serial.print(dataToSend[3]);
-    Serial.print(" : ");
-    Serial.print(dataToSend[4]);
-    Serial.print(" : ");
-    Serial.println(dataToSend[5]);
-    
-    rf22.send(dataToSend, sizeof(dataToSend));
-
-    isTransmit = false;
+    //rf22.send(dataToSend, sizeof(dataToSend));
+    //isTransmit = false;
   }
-  
-  //delay(10);
+
+  if ((transmitVal_1 & 1) == 1)
+  {
+    Serial.println("PING try");
+    int t = rf22Ping();
+    Serial.print("PING: ");
+    Serial.print(t);
+    Serial.println(" s");
+  }
+  // delay(10);
 
   // TODO: testDisplay();
 }
@@ -211,7 +213,7 @@ void readButtons() {
   while(customKeypad.available()){
     keypadEvent e = customKeypad.read();
     char pressedKey = (char)e.bit.KEY;
-    Serial.print(pressedKey);
+    // Serial.print(pressedKey);
     if(e.bit.EVENT == KEY_JUST_PRESSED) {
       
       // Serial.println(" pressed");
@@ -432,6 +434,38 @@ Handshake_ret rf22Handshake() {
   }
 
   return milkShake;
+}
+
+int rf22Ping() {
+  char buf[RF22_MAX_MESSAGE_LEN];
+  uint8_t len = sizeof(buf);
+  
+  unsigned long startTime = 0;
+  unsigned long endTime = 0;
+  int duration = 0;
+  
+  // hand shake string
+  startTime = millis();
+  uint8_t data = HAND_SHAKE_PING;
+  rf22.send(&data, sizeof(data));
+  
+  // Now wait for a reply
+  rf22.waitPacketSent();
+
+  if (rf22.waitAvailableTimeout(500))
+  { 
+    // Should be a message for us now   
+    if (rf22.recv((uint8_t*)buf, &len))
+    {
+      Serial.print("got reply: ");
+      Serial.println((char*)buf);
+  
+      endTime = millis();
+      duration = endTime - startTime;
+    }
+  }
+
+  return duration;
 }
 
 void stopForever() {
