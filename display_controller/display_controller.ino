@@ -109,9 +109,9 @@ void setup(){
   Serial.begin(9600);
 
   // init LCD Display
-  lcd.begin(13, 12, 8);
+  lcd.begin(A0, A1, 8);
   lcd.init();
-  
+
   // init RF22
   if (!rf22.init()) {
     // Defaults after init are 434.0MHz, 0.05MHz AFC pull-in, modulation FSK_Rb2_4Fd36  
@@ -150,15 +150,26 @@ void setup(){
 }
 
 void loop() {
+  // TODO: ADD CYCLE FOR LOW PRIO TASKS
+  
   // read Pots and Buttons values
   readPots();
   readButtons();
+
+  /** Begin Display Tasks **/
+  // do a ping to get the intensity of the reception
+  updateNetworkLevel();
+
+  // Show the Throttle power
+  lcd.writePercentage(dataToSend[0]);
+  lcd.update();
+  /** End Display Loops **/
   
   if (isTransmit == true){
     //rf22.send(dataToSend, sizeof(dataToSend));
     //isTransmit = false;
   }
-
+  
   if ((transmitVal_1 & 1) == 1)
   {
     Serial.println("PING try");
@@ -167,7 +178,7 @@ void loop() {
     Serial.print(t);
     Serial.println(" s");
   }
-  // delay(10);
+  delay(10);
 
   // TODO: testDisplay();
 }
@@ -184,20 +195,13 @@ bool readPots() {
     || ((angleValue > last_angleValue + pot_sensibility)      || (angleValue < last_angleValue - pot_sensibility))
     || ((tailValue > last_tailValue + pot_sensibility)        || (tailValue < last_tailValue - pot_sensibility))
     || ((ailronValue > last_ailronValue + pot_sensibility)    || (ailronValue < last_ailronValue - pot_sensibility))) {
-    /*Serial.print(throttleValue);
-    Serial.print(" : ");
-    Serial.print(angleValue);
-    Serial.print(" : ");
-    Serial.print(tailValue);
-    Serial.print(" : ");
-    Serial.println(ailronValue);*/
 
     last_throttleValue = throttleValue;
     last_angleValue = angleValue;
     last_tailValue = tailValue;
     last_ailronValue = ailronValue;
 
-    dataToSend[0] = map(throttleValue, 0, 1024, 0, 256);
+    dataToSend[0] = map(throttleValue, 0, 1024, 0, 101);
     dataToSend[1] = map(angleValue, 0, 1024, 0, 256);
     dataToSend[2] = map(tailValue, 0, 1024, 0, 256);
     dataToSend[3] = map(ailronValue, 0, 1024, 0, 256);
@@ -456,16 +460,21 @@ int rf22Ping() {
   { 
     // Should be a message for us now   
     if (rf22.recv((uint8_t*)buf, &len))
-    {
-      Serial.print("got reply: ");
-      Serial.println((char*)buf);
-  
+    {  
       endTime = millis();
       duration = endTime - startTime;
     }
   }
 
   return duration;
+}
+
+void updateNetworkLevel() {
+  uint8_t level = map(rf22Ping(), 98, 200, 5, 0);
+  Serial.print("  ");
+  Serial.print(level);
+  lcd.setNetworkLevel(level);
+  lcd.update();
 }
 
 void stopForever() {
